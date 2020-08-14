@@ -81,10 +81,10 @@ func (client *Client) UploadReader(ctx context.Context, limit *pb.OrderLimit, pi
 func (client *Client) Upload(ctx context.Context, limit *pb.OrderLimit, piecePrivateKey storj.PiecePrivateKey) (_ Uploader, err error) {
 	defer mon.Task()(&ctx, "node: "+limit.StorageNodeId.String()[0:8])(&err)
 
-	peer, err := client.conn.PeerIdentity()
-	if err != nil {
-		return nil, ErrInternal.Wrap(err)
-	}
+	// peer, err := client.conn.PeerIdentity()
+	// if err != nil {
+	// 	return nil, ErrInternal.Wrap(err)
+	// }
 
 	stream, err := client.client.Upload(ctx)
 	if err != nil {
@@ -110,9 +110,9 @@ func (client *Client) Upload(ctx context.Context, limit *pb.OrderLimit, piecePri
 		client:     client,
 		limit:      limit,
 		privateKey: piecePrivateKey,
-		peer:       peer,
-		stream:     stream,
-		ctx:        ctx,
+		// peer:       peer,
+		stream: stream,
+		ctx:    ctx,
 
 		hash:           pkcrypto.NewHash(),
 		offset:         0,
@@ -130,7 +130,7 @@ func (client *Client) Upload(ctx context.Context, limit *pb.OrderLimit, piecePri
 // Write sends data to the storagenode allocating as necessary.
 func (client *Upload) Write(data []byte) (written int, err error) {
 	ctx := client.ctx
-	defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
+	// defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
 
 	if client.finished {
 		return 0, io.EOF
@@ -209,7 +209,7 @@ func (client *Upload) Cancel(ctx context.Context) (err error) {
 
 // Commit finishes uploading by sending the piece-hash and retrieving the piece-hash.
 func (client *Upload) Commit(ctx context.Context) (_ *pb.PieceHash, err error) {
-	defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
+	// defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
 	if client.finished {
 		return nil, io.EOF
 	}
@@ -252,10 +252,10 @@ func (client *Upload) Commit(ctx context.Context) (_ *pb.PieceHash, err error) {
 	}
 
 	// verification
-	verifyErr := client.client.VerifyPieceHash(client.stream.Context(), client.peer, client.limit, response.Done, uplinkHash.Hash)
+	// verifyErr := client.client.VerifyPieceHash(client.stream.Context(), client.peer, client.limit, response.Done, uplinkHash.Hash)
 
 	// combine all the errors from before
 	// sendErr is io.EOF when we failed to send
 	// closeErr is io.EOF when storage node closed properly
-	return response.Done, errs.Combine(verifyErr, ignoreEOF(sendErr), ignoreEOF(closeErr))
+	return response.Done, errs.Combine(nil, ignoreEOF(sendErr), ignoreEOF(closeErr))
 }

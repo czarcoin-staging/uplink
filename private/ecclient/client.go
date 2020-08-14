@@ -231,14 +231,14 @@ func (ec *ecClient) PutPiece(ctx, parent context.Context, limit *pb.AddressedOrd
 	}
 	defer func() { err = errs.Combine(err, ps.Close()) }()
 
-	peerID, err = ps.GetPeerIdentity()
-	if err != nil {
-		ec.log.Debug("Failed getting peer identity from node connection",
-			zap.Stringer("Node ID", storageNodeID),
-			zap.Error(err),
-		)
-		return nil, nil, err
-	}
+	// peerID, err = ps.GetPeerIdentity()
+	// if err != nil {
+	// 	ec.log.Debug("Failed getting peer identity from node connection",
+	// 		zap.Stringer("Node ID", storageNodeID),
+	// 		zap.Error(err),
+	// 	)
+	// 	return nil, nil, err
+	// }
 
 	hash, err = ps.UploadReader(ctx, limit.GetLimit(), privateKey, data)
 	if err != nil {
@@ -272,7 +272,7 @@ func (ec *ecClient) PutPiece(ctx, parent context.Context, limit *pb.AddressedOrd
 		return nil, nil, err
 	}
 
-	return hash, peerID, nil
+	return hash, nil, nil
 }
 
 func (ec *ecClient) Get(ctx context.Context, limits []*pb.AddressedOrderLimit, privateKey storj.PiecePrivateKey, es eestream.ErasureScheme, size int64) (rr ranger.Ranger, err error) {
