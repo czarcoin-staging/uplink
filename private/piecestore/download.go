@@ -5,7 +5,6 @@ package piecestore
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/zeebo/errs"
@@ -63,10 +62,10 @@ type downloadStream interface {
 func (client *Client) Download(ctx context.Context, limit *pb.OrderLimit, piecePrivateKey storj.PiecePrivateKey, offset, size int64) (_ Downloader, err error) {
 	defer mon.Task()(&ctx)(&err)
 
-	peer, err := client.conn.PeerIdentity()
-	if err != nil {
-		return nil, ErrInternal.Wrap(err)
-	}
+	// peer, err := client.conn.PeerIdentity()
+	// if err != nil {
+	// 	return nil, ErrInternal.Wrap(err)
+	// }
 
 	stream, err := client.client.Download(ctx)
 	if err != nil {
@@ -89,9 +88,9 @@ func (client *Client) Download(ctx context.Context, limit *pb.OrderLimit, pieceP
 		client:     client,
 		limit:      limit,
 		privateKey: piecePrivateKey,
-		peer:       peer,
-		stream:     stream,
-		ctx:        ctx,
+		// peer:       peer,
+		stream: stream,
+		ctx:    ctx,
 
 		read: 0,
 
@@ -108,7 +107,7 @@ func (client *Client) Download(ctx context.Context, limit *pb.OrderLimit, pieceP
 // Read downloads data from the storage node allocating as necessary.
 func (client *Download) Read(data []byte) (read int, err error) {
 	ctx := client.ctx
-	defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
+	// defer mon.Task()(&ctx, "node: "+client.peer.ID.String()[0:8])(&err)
 
 	if client.closed {
 		return 0, io.ErrClosedPipe
@@ -248,8 +247,8 @@ func (client *Download) closeAndTryFetchError() {
 func (client *Download) Close() (err error) {
 	defer func() {
 		if err != nil {
-			details := errs.Class(fmt.Sprintf("(Node ID: %s, Piece ID: %s)", client.peer.ID.String(), client.limit.PieceId.String()))
-			err = details.Wrap(err)
+			// details := errs.Class(fmt.Sprintf("(Node ID: %s, Piece ID: %s)", client.peer.ID.String(), client.limit.PieceId.String()))
+			// err = details.Wrap(err)
 			err = Error.Wrap(err)
 		}
 	}()
